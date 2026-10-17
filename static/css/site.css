@@ -1,0 +1,14 @@
+/* ViewNet overrides — loaded after main.rtl.css. Keep template CSS untouched. */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --default-font: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+  --heading-font: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+  --nav-font: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+}
+body { font-feature-settings: "ss01"; }

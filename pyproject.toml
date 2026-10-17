@@ -1,0 +1,27 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["src_template", "static", "tools/main.ltr.orig.css"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+ignore = ["E501", "DJ001"]
+
+[tool.importlinter]
+root_packages = ["apps"]
+
+[[tool.importlinter.contracts]]
+name = "core depends on no other app"
+type = "forbidden"
+source_modules = ["apps.core"]
+forbidden_modules = ["apps.locations", "apps.catalog"]
+
+[[tool.importlinter.contracts]]
+name = "layers (higher may import lower, never the reverse)"
+type = "layers"
+layers = ["apps.catalog", "apps.locations", "apps.core"]

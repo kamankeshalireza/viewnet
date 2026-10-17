@@ -1,0 +1,22 @@
+name: viewnet-dev
+services:
+  postgres:
+    image: postgres:16
+    environment: { POSTGRES_DB: viewnet, POSTGRES_USER: viewnet, POSTGRES_PASSWORD: viewnet }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    ports: ["127.0.0.1:5432:5432"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U viewnet"], interval: 5s, retries: 10 }
+  redis:
+    image: redis:7
+    command: redis-server --appendonly yes --maxmemory-policy volatile-lru
+    ports: ["127.0.0.1:6379:6379"]
+    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 5s, retries: 10 }
+  web:
+    image: python:3.12-slim
+    working_dir: /app
+    command: sh -c "pip install -q -r requirements/development.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes: ["../:/app"]
+    env_file: [../.env]
+    ports: ["8000:8000"]
+    depends_on: { postgres: { condition: service_healthy }, redis: { condition: service_healthy } }
+volumes: { pgdata: {} }

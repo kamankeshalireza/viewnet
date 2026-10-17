@@ -1,0 +1,6 @@
+-r base.txt
+pytest>=8
+pytest-django>=4.8
+ruff>=0.5
+import-linter>=2.0
+pip-audit
