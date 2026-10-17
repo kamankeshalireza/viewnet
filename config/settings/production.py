@@ -10,3 +10,11 @@ SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = "DENY"
+
+from django.core.exceptions import ImproperlyConfigured  # noqa: E402
+
+if len(OTP_HMAC_PEPPER) < 32:  # noqa: F405
+    raise ImproperlyConfigured("OTP_HMAC_PEPPER must be set (>= 32 chars) in production")
+if SMS_PROVIDER == "console":  # noqa: F405
+    raise ImproperlyConfigured("SMS_PROVIDER=console is not allowed in production")
+NUM_PROXIES = env.int("NUM_PROXIES", default=1)  # noqa: F405  (nginx in front)

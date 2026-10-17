@@ -13,15 +13,21 @@ select = ["E", "F", "I", "B", "UP", "DJ"]
 ignore = ["E501", "DJ001"]
 
 [tool.importlinter]
-root_packages = ["apps"]
+root_packages = ["apps", "integrations"]
 
 [[tool.importlinter.contracts]]
 name = "core depends on no other app"
 type = "forbidden"
 source_modules = ["apps.core"]
-forbidden_modules = ["apps.locations", "apps.catalog"]
+forbidden_modules = ["apps.locations", "apps.catalog", "apps.accounts"]
 
 [[tool.importlinter.contracts]]
 name = "layers (higher may import lower, never the reverse)"
 type = "layers"
-layers = ["apps.catalog", "apps.locations", "apps.core"]
+layers = ["apps.catalog", "apps.accounts", "apps.locations", "apps.core"]
+
+[[tool.importlinter.contracts]]
+name = "integrations never import apps"
+type = "forbidden"
+source_modules = ["integrations"]
+forbidden_modules = ["apps"]

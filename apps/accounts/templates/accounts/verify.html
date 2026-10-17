@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}کد تأیید | ویونت{% endblock %}
+{% block content %}
+<section class="py-5"><div class="container"><div class="row justify-content-center"><div class="col-md-6 col-lg-5">
+  <div class="card shadow-sm"><div class="card-body p-4">
+    <h1 class="h4 mb-2">کد تأیید را وارد کنید</h1>
+    <p class="text-muted">کد ۶ رقمی به شمارهٔ <span dir="ltr">{{ phone|fa_digits }}</span> ارسال شد.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.code.id_for_label }}">{{ form.code.label }}</label>
+        {{ form.code }}
+        {% for e in form.code.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+      </div>
+      <button class="btn btn-primary w-100" type="submit">ورود</button>
+    </form>
+    <div class="d-flex justify-content-between mt-3 small">
+      <form method="post" action="{% url 'accounts:resend' %}">{% csrf_token %}<button class="btn btn-link p-0" type="submit">ارسال دوبارهٔ کد</button></form>
+      <a href="{% url 'accounts:login' %}">تغییر شماره</a>
+    </div>
+  </div></div>
+</div></div></div></section>
+{% endblock %}

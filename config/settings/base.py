@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.core",
     "apps.locations",
+    "apps.accounts",
     "apps.catalog",
 ]
 
@@ -36,6 +37,10 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+AUTH_USER_MODEL = "accounts.User"
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "/"
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -105,3 +110,29 @@ LOGGING = {
 # Business defaults (overridable via SiteSetting later)
 ORDER_PAYMENT_TIMEOUT_MINUTES = env.int("ORDER_PAYMENT_TIMEOUT_MINUTES", default=30)
 STOCK_RESERVATION_TTL_MINUTES = env.int("STOCK_RESERVATION_TTL_MINUTES", default=30)
+
+# Reverse proxies in front of Django (nginx = 1). Needed to see the real client IP for rate limits.
+NUM_PROXIES = env.int("NUM_PROXIES", default=0)
+
+# SMS / OTP (architecture §9). Pepper is separate from SECRET_KEY and required in production.
+SMS_PROVIDERS = {
+    "console": "integrations.sms.console.ConsoleSMSProvider",
+    "fake": "integrations.sms.fake.FakeSMSProvider",
+}
+SMS_PROVIDER = env("SMS_PROVIDER", default="console")
+SMS_FALLBACK_PROVIDER = env("SMS_FALLBACK_PROVIDER", default="")
+OTP_HMAC_PEPPER = env("OTP_HMAC_PEPPER", default="")
+OTP_TTL_SECONDS = env.int("OTP_TTL_SECONDS", default=120)
+OTP_MAX_ATTEMPTS = env.int("OTP_MAX_ATTEMPTS", default=5)
+OTP_RESEND_COOLDOWN = env.int("OTP_RESEND_COOLDOWN", default=120)
+OTP_SEND_LIMIT_PHONE_HOURLY = env.int("OTP_SEND_LIMIT_PHONE_HOURLY", default=5)
+OTP_SEND_LIMIT_PHONE_DAILY = env.int("OTP_SEND_LIMIT_PHONE_DAILY", default=10)
+OTP_SEND_LIMIT_IP_HOURLY = env.int("OTP_SEND_LIMIT_IP_HOURLY", default=20)
+OTP_GLOBAL_PER_MINUTE = env.int("OTP_GLOBAL_PER_MINUTE", default=60)
+OTP_VERIFY_LIMIT_PHONE = env.int("OTP_VERIFY_LIMIT_PHONE", default=10)
+OTP_VERIFY_LIMIT_IP = env.int("OTP_VERIFY_LIMIT_IP", default=30)
+
+CELERY_TASK_ROUTES = {"apps.accounts.tasks.send_otp_sms": {"queue": "otp"}}
+CELERY_BEAT_SCHEDULE = {
+    "cleanup-otp-challenges": {"task": "apps.accounts.tasks.cleanup_otp_challenges", "schedule": 86400.0},
+}
