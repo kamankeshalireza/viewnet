@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.cache import cache
 
 from .models import SiteSetting
@@ -12,4 +13,4 @@ def site(request):
         except Exception:  # DB not migrated yet (first boot / CI)
             setting = SiteSetting()
         cache.set("site_setting", setting, 60)
-    return {"site": setting}
+    return {"site": setting, "SITE_URL": settings.SITE_URL.rstrip("/")}

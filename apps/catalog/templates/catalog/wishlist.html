@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}علاقه‌مندی‌ها | {{ site.store_name }}{% endblock %}
+{% block meta_extra %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4">علاقه‌مندی‌های من</h2>
+  {% if products %}
+  <div class="row g-4">{% for product in products %}<div class="col-6 col-lg-3">{% include "components/product_card.html" %}</div>{% endfor %}</div>
+  {% else %}<p class="text-muted">فهرست علاقه‌مندی‌های شما خالی است.</p>{% endif %}
+</div>
+{% endblock %}

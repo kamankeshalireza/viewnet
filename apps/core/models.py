@@ -18,6 +18,10 @@ class SiteSetting(TimeStampedModel):
     email = models.EmailField("ایمیل", blank=True)
     address = models.TextField("نشانی", blank=True)
     announcement = models.CharField("پیام نوار بالا", max_length=200, blank=True)
+    about_text = models.TextField("متن کوتاه دربارهٔ فروشگاه (فوتر)", blank=True)
+    working_hours = models.CharField("ساعات کاری", max_length=150, blank=True)
+    instagram_url = models.URLField("اینستاگرام", blank=True)
+    telegram_url = models.URLField("تلگرام", blank=True)
     purchases_enabled = models.BooleanField("امکان خرید فعال است", default=True)
     min_order_rial = models.PositiveBigIntegerField("حداقل مبلغ سفارش (ریال)", default=0)
 

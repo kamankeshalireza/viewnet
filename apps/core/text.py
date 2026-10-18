@@ -56,3 +56,11 @@ def normalize_phone(raw: str | None) -> str | None:
 
 def mask_phone(phone: str) -> str:
     return f"{phone[:4]}***{phone[-3:]}" if len(phone) >= 8 else "***"
+
+
+def make_slug(text: str, max_length: int = 80) -> str:
+    """Unicode (Persian-friendly) slug. ZWNJ becomes a separator instead of being dropped."""
+    from django.utils.text import slugify
+
+    slug = slugify(normalize_fa(text, zwnj="space"), allow_unicode=True)
+    return slug[:max_length].strip("-") or "item"

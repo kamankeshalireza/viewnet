@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ product.seo_title|default:product.title }} | {{ site.store_name }}{% endblock %}
+{% block meta_description %}{{ product.seo_description|default:product.short_description|truncatechars:160 }}{% endblock %}
+{% block meta_extra %}{% if product.seo_noindex %}<meta name="robots" content="noindex,follow">{% endif %}{% endblock %}
+{% block content %}
+{% include "includes/breadcrumb.html" with title=product.title crumbs=crumbs %}
+<section class="py-5">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-6">
+        {% with main=images.0 %}
+        <a id="gallery-main-link" class="glightbox d-block border rounded-3 overflow-hidden" href="{% if main %}{{ main.url_zoom }}{% else %}{% static 'img/no-image.svg' %}{% endif %}">
+          <img id="gallery-main" class="img-fluid w-100" src="{% if main %}{{ main.url_detail }}{% else %}{% static 'img/no-image.svg' %}{% endif %}" alt="{{ main.alt|default:product.title }}" width="900" height="900">
+        </a>
+        {% endwith %}
+        {% if images|length > 1 %}
+        <div class="d-flex gap-2 mt-3 flex-wrap">
+          {% for im in images %}
+          <a href="#" data-gallery-thumb data-detail="{{ im.url_detail }}" data-zoom="{{ im.url_zoom }}"><img class="rounded-2 border" src="{{ im.url_thumb }}" width="80" height="80" alt="{{ im.alt|default:product.title }}" loading="lazy"></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-6" id="product-purchase">
+        {% if product.brand %}<div class="text-muted mb-1">{{ product.brand.name }}</div>{% endif %}
+        <h1 class="h3 mb-3">{{ product.title }}</h1>
+        {% if product.short_description %}<p class="text-muted">{{ product.short_description }}</p>{% endif %}
+
+        <div class="mb-3">
+          <span id="product-price" class="fs-4 fw-bold">{{ default_variant.price|default:"—" }}</span>
+          <del id="product-compare" class="text-muted me-2" {% if not default_variant.compare %}hidden{% endif %}>{{ default_variant.compare }}</del>
+        </div>
+
+        {% for ax in variants_payload.axes %}
+        <div class="mb-3">
+          <div class="fw-semibold mb-2">{{ ax.label }}</div>
+          <div class="d-flex flex-wrap gap-2">
+            {% for c in ax.choices %}
+            <div>
+              <input type="radio" class="btn-check" name="axis-{{ ax.key }}" id="ax-{{ ax.key }}-{{ c.id }}" value="{{ c.id }}" data-axis="{{ ax.key }}" {% if c.id == ax.selected %}checked{% endif %}>
+              <label class="btn btn-outline-secondary btn-sm" for="ax-{{ ax.key }}-{{ c.id }}">
+                {% if c.hex %}<span class="swatch-dot d-inline-block align-middle ms-1" data-hex="{{ c.hex }}"></span>{% endif %}{{ c.label }}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+        <div id="variant-message" class="text-danger small mb-2" hidden></div>
+
+        <div class="d-flex gap-2 align-items-center mb-3">
+          <button type="button" id="add-to-cart-btn" class="btn btn-primary btn-lg" disabled title="سبد خرید در فاز بعد فعال می‌شود">
+            <i class="bi bi-cart-plus ms-1"></i>افزودن به سبد خرید
+          </button>
+          <form method="post" action="{% url 'catalog:wishlist_toggle' product.pk %}">
+            {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn btn-outline-secondary btn-lg" aria-label="علاقه‌مندی"><i class="bi {% if in_wishlist %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i></button>
+          </form>
+        </div>
+        <div class="small text-muted">کد کالا: <span id="product-sku" dir="ltr">{{ default_variant.sku }}</span>
+          {% if not product.requires_shipping %} · <span class="badge bg-info">تحویل غیرحضوری</span>{% endif %}</div>
+      </div>
+    </div>
+
+    <ul class="nav nav-tabs mt-5" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-desc" type="button" role="tab">توضیحات</button></li>
+      {% if specs or attribute_values %}<li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-specs" type="button" role="tab">مشخصات فنی</button></li>{% endif %}
+    </ul>
+    <div class="tab-content border border-top-0 p-4">
+      <div class="tab-pane fade show active" id="tab-desc" role="tabpanel">
+        {% if product.description %}{{ product.description|safe }}{% else %}<p class="text-muted">توضیحاتی ثبت نشده است.</p>{% endif %}
+      </div>
+      <div class="tab-pane fade" id="tab-specs" role="tabpanel">
+        <table class="table table-striped mb-0"><tbody>
+          {% for av in attribute_values %}<tr><th scope="row" class="w-25">{{ av.option.definition.name }}</th><td>{{ av.option.label }}</td></tr>{% endfor %}
+          {% for s in specs %}<tr><th scope="row" class="w-25">{{ s.key }}</th><td>{{ s.value }}</td></tr>{% endfor %}
+        </tbody></table>
+      </div>
+    </div>
+
+    {% if related %}
+    <h3 class="mt-5 mb-4">محصولات مرتبط</h3>
+    <div class="row g-4">{% for product in related %}<div class="col-6 col-lg-3">{% include "components/product_card.html" %}</div>{% endfor %}</div>
+    {% endif %}
+  </div>
+</section>
+{{ variants_payload|json_script:"variants-data" }}
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/product-detail.js' %}"></script>{% endblock %}

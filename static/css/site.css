@@ -12,3 +12,7 @@
   --nav-font: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
 }
 body { font-feature-settings: "ss01"; }
+
+.swatch-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #ccc; }
+.scroll-14 { max-height: 14rem; }
+.color-swatch { display: inline-block; width: 16px; height: 16px; border-radius: 50%; border: 1px solid #ccc; vertical-align: middle; margin-inline-end: .35rem; }

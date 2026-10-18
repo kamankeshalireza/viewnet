@@ -1,0 +1,29 @@
+{% load static %}
+{% with img=product.primary_image hover=product.hover_image %}
+<div class="product-card">
+  <div class="product-image">
+    <img src="{% if img %}{{ img.url_card }}{% else %}{% static 'img/no-image.svg' %}{% endif %}" class="main-image img-fluid" alt="{{ img.alt|default:product.title }}" loading="lazy" width="480" height="480">
+    {% if hover %}<img src="{{ hover.url_card }}" class="hover-image img-fluid" alt="" loading="lazy" width="480" height="480">{% endif %}
+    <div class="product-overlay">
+      <div class="product-actions">
+        <a href="{{ product.get_absolute_url }}" class="action-btn" title="مشاهده" aria-label="مشاهدهٔ {{ product.title }}"><i class="bi bi-eye"></i></a>
+        <form method="post" action="{% url 'catalog:wishlist_toggle' product.pk %}" class="d-inline">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="action-btn" title="علاقه‌مندی" aria-label="افزودن به علاقه‌مندی‌ها"><i class="bi bi-heart"></i></button>
+        </form>
+      </div>
+    </div>
+    {% if not product.in_stock %}<div class="product-badge">ناموجود</div>
+    {% elif product.discount_percent %}<div class="product-badge sale">{{ product.discount_percent|fa_digits }}٪ تخفیف</div>
+    {% elif product.is_new %}<div class="product-badge new">جدید</div>{% endif %}
+  </div>
+  <div class="product-details">
+    <div class="product-category">{{ product.category.name }}</div>
+    <h4 class="product-title"><a href="{{ product.get_absolute_url }}">{{ product.title }}</a></h4>
+    <div class="product-meta">
+      <div class="product-price">{% if product.min_price_rial %}{% if product.has_price_range %}از {% endif %}{{ product.min_price_rial|toman }}{% else %}—{% endif %}</div>
+      {% if product.rating_count %}<div class="product-rating"><i class="bi bi-star-fill"></i> {{ product.rating_avg_x10|floatformat:0|fa_digits }}</div>{% endif %}
+    </div>
+  </div>
+</div>
+{% endwith %}

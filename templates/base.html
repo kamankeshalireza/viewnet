@@ -21,7 +21,7 @@
   <link href="{% static 'css/site.css' %}" rel="stylesheet">
   {% block extra_css %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   {% include "includes/header.html" %}
 
   {% include "includes/messages.html" %}
@@ -38,7 +38,9 @@
   <script src="{% static 'vendor/glightbox/js/glightbox.min.js' %}"></script>
   <script src="{% static 'vendor/drift-zoom/Drift.min.js' %}"></script>
   <script src="{% static 'vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'vendor/htmx/htmx.min.js' %}"></script>
   <script src="{% static 'js/main.js' %}"></script>
+  <script src="{% static 'js/site.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

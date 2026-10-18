@@ -56,6 +56,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.core.context_processors.site",
+                "apps.catalog.context_processors.nav_categories",
             ],
             "builtins": ["apps.core.templatetags.core_tags"],
         },
@@ -136,3 +137,6 @@ CELERY_TASK_ROUTES = {"apps.accounts.tasks.send_otp_sms": {"queue": "otp"}}
 CELERY_BEAT_SCHEDULE = {
     "cleanup-otp-challenges": {"task": "apps.accounts.tasks.cleanup_otp_challenges", "schedule": 86400.0},
 }
+
+SEARCH_BACKEND = "apps.catalog.search.backend.SimpleSearchBackend"
+CELERY_TASK_ROUTES["apps.catalog.images.process_product_image"] = {"queue": "images"}

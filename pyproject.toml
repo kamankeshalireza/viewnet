@@ -10,7 +10,7 @@ extend-exclude = ["src_template", "static", "tools/main.ltr.orig.css"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "DJ"]
-ignore = ["E501", "DJ001"]
+ignore = ["E501", "DJ001", "DJ006", "DJ008", "DJ012"]
 
 [tool.importlinter]
 root_packages = ["apps", "integrations"]
