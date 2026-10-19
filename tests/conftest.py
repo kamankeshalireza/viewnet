@@ -9,5 +9,6 @@ from integrations.sms.fake import FakeSMSProvider
 def _isolate():
     cache.clear()
     FakeSMSProvider.reset()
+    saved = events.snapshot()  # handlers registered by AppConfig.ready() must survive between tests
     yield
-    events.clear_handlers()
+    events.restore(saved)

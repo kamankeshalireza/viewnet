@@ -9,6 +9,8 @@
   var skuEl = document.getElementById('product-sku');
   var msgEl = document.getElementById('variant-message');
   var buy = document.getElementById('add-to-cart-btn');
+  var buyLabel = document.getElementById('add-to-cart-label');
+  var variantInput = document.getElementById('variant-id');
 
   function selection() {
     var sel = {};
@@ -32,7 +34,9 @@
     compareEl.textContent = v.compare || '';
     compareEl.hidden = !v.compare;
     skuEl.textContent = v.sku;
-    if (buy) { buy.disabled = false; buy.dataset.variant = v.id; }
+    if (variantInput) variantInput.value = v.id;
+    if (buy) { buy.disabled = !v.in_stock; }
+    if (buyLabel) buyLabel.textContent = v.in_stock ? 'افزودن به سبد خرید' : 'ناموجود';
   }
   root.addEventListener('change', update);
   update();

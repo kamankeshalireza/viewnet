@@ -141,4 +141,4 @@ def test_admin_pages_load_and_product_save_recalcs(client, settings, media):
     r = client.post(f"{prefix}/product/add/", data)
     assert r.status_code == 302, getattr(r, "context", None) and r.context["adminform"].form.errors
     p = Product.objects.get(title="قاب تست")
-    assert (p.min_price_rial, p.in_stock) == (1_200_000, True) and "adm-1" in p.search_text
+    assert (p.min_price_rial, p.in_stock) == (1_200_000, False)  # no stock entered yet and "adm-1" in p.search_text

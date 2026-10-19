@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_http_methods, require_POST
 
+from apps.core.constants import GUEST_CART_SESSION_KEY
+from apps.core.events import UserLoggedIn, publish
 from apps.core.http import get_client_ip
 
 from .forms import CodeForm, PhoneForm, ProfileForm
@@ -71,8 +73,9 @@ def login_verify(request):
                 messages.error(request, "این حساب غیرفعال است.")
                 return redirect("accounts:login")
             nxt = _safe_next(request, request.session.get("otp_next"))
-            # NOTE (Phase 4): read the guest cart BEFORE login() and merge it here.
+            guest_cart = dict(request.session.get(GUEST_CART_SESSION_KEY) or {})  # read BEFORE login() touches the session
             login(request, user, backend=BACKEND)  # cycles the session key
+            publish(UserLoggedIn(user_id=user.pk, request=request, guest_cart=guest_cart))  # cart app merges it
             request.session.pop("otp_phone", None)
             request.session.pop("otp_next", None)
             if not user.first_name:

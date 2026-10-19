@@ -270,6 +270,8 @@ class ProductVariant(TimeStampedModel):
     is_default = models.BooleanField("پیش‌فرض", default=False)
     is_active = models.BooleanField("فعال", default=True)
     position = models.PositiveIntegerField("ترتیب", default=0)
+    # Maintained by inventory (available > 0). Meaningful only for physical products.
+    is_in_stock = models.BooleanField(default=False, editable=False)
 
     class Meta:
         verbose_name, verbose_name_plural, ordering = "تنوع کالا", "تنوع‌های کالا", ["position", "pk"]
@@ -281,6 +283,11 @@ class ProductVariant(TimeStampedModel):
 
     def __str__(self):
         return f"{self.product.title} — {self.label}" if self.label else self.product.title
+
+    @property
+    def is_purchasable(self) -> bool:
+        """Active and (digital, or physical with stock available)."""
+        return self.is_active and (not self.product.requires_shipping or self.is_in_stock)
 
     @property
     def label(self) -> str:

@@ -90,4 +90,4 @@ class Command(BaseCommand):
         make("کابل شارژ USB-C (نمونه)", "کابل", None, [("DEMO-CABLE-1M", None, [], 120_000, None), ("DEMO-CABLE-2M", None, [], 160_000, None)], image="product-3.webp")
         make("پاوربانک ۱۰۰۰۰ (نمونه)", "پاوربانک", None, [("DEMO-PB-10K", None, [black], 780_000, 890_000)], image="product-4.webp", specs=[("ظرفیت", "۱۰۰۰۰ میلی‌آمپرساعت")])
         make("ساخت اپل آیدی (نمونه)", "اپل آیدی", brands["اپل"], [("DEMO-APPLEID", None, [], 300_000, None)], ptype=Product.Type.DIGITAL)
-        self.stdout.write(self.style.SUCCESS("Demo products: OK (titles end with «نمونه»)"))
+        self.stdout.write(self.style.SUCCESS("Demo products: OK (titles end with «نمونه»). Now run: python manage.py seed_demo_stock"))

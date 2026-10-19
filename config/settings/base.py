@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     "apps.locations",
     "apps.accounts",
     "apps.catalog",
+    "apps.inventory",
+    "apps.cart",
 ]
 
 MIDDLEWARE = [
@@ -57,6 +59,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "apps.core.context_processors.site",
                 "apps.catalog.context_processors.nav_categories",
+                "apps.cart.context_processors.cart_summary",
             ],
             "builtins": ["apps.core.templatetags.core_tags"],
         },
@@ -140,3 +143,8 @@ CELERY_BEAT_SCHEDULE = {
 
 SEARCH_BACKEND = "apps.catalog.search.backend.SimpleSearchBackend"
 CELERY_TASK_ROUTES["apps.catalog.images.process_product_image"] = {"queue": "images"}
+
+# Cart / stock policy (no backorders: sold-out items are unavailable).
+CART_MAX_QTY_PER_ITEM = env.int("CART_MAX_QTY_PER_ITEM", default=10)
+CELERY_TASK_ROUTES["apps.inventory.tasks.expire_stock_reservations"] = {"queue": "default"}
+CELERY_BEAT_SCHEDULE["expire-stock-reservations"] = {"task": "apps.inventory.tasks.expire_stock_reservations", "schedule": 60.0}

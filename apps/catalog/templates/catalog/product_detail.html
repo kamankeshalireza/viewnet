@@ -50,10 +50,16 @@
         {% endfor %}
         <div id="variant-message" class="text-danger small mb-2" hidden></div>
 
-        <div class="d-flex gap-2 align-items-center mb-3">
-          <button type="button" id="add-to-cart-btn" class="btn btn-primary btn-lg" disabled title="سبد خرید در فاز بعد فعال می‌شود">
-            <i class="bi bi-cart-plus ms-1"></i>افزودن به سبد خرید
-          </button>
+        <div class="d-flex gap-2 align-items-start mb-3 flex-wrap">
+          <form method="post" action="{% url 'cart:add' %}" class="d-flex gap-2" id="add-to-cart-form">
+            {% csrf_token %}
+            <input type="hidden" name="variant_id" id="variant-id" value="{{ default_variant.id }}">
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="number" name="qty" value="1" min="1" max="10" class="form-control form-control-lg qty-input" aria-label="تعداد">
+            <button type="submit" id="add-to-cart-btn" class="btn btn-primary btn-lg" {% if not default_variant.in_stock %}disabled{% endif %}>
+              <i class="bi bi-cart-plus ms-1"></i><span id="add-to-cart-label">{% if default_variant.in_stock %}افزودن به سبد خرید{% else %}ناموجود{% endif %}</span>
+            </button>
+          </form>
           <form method="post" action="{% url 'catalog:wishlist_toggle' product.pk %}">
             {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
             <button type="submit" class="btn btn-outline-secondary btn-lg" aria-label="علاقه‌مندی"><i class="bi {% if in_wishlist %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i></button>

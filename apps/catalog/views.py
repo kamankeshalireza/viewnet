@@ -78,8 +78,11 @@ def _variant_payload(product):
         for o in v.options.all():
             ax[f"attr{o.definition_id}"] = o.pk
         items.append({"id": v.pk, "sku": v.sku, "price": toman(v.price_rial), "default": v.is_default, "axes": ax,
+                      "in_stock": v.is_purchasable,
                       "compare": toman(v.compare_at_price_rial) if v.compare_at_price_rial else ""})
-    default = next((i for i in items if i["default"]), items[0] if items else None)
+    # Prefer the default variant if it can be bought, otherwise the first one that can.
+    default = next((i for i in items if i["default"] and i["in_stock"]), next((i for i in items if i["in_stock"]), None)) \
+        or next((i for i in items if i["default"]), items[0] if items else None)
     return {"axes": axes, "variants": items}, default
 
 

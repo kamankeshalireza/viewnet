@@ -19,8 +19,7 @@ def recalc_product(product_id: int) -> None:
         min_price_rial=min(prices, default=0),
         max_price_rial=max(prices, default=0),
         compare_at_min_rial=min(compare, default=0),
-        # Phase 4 replaces this with real stock (digital products are always available).
-        in_stock=bool(active),
+        in_stock=any(v.is_purchasable for v in active),
         search_text=build_search_text(product),
     )
 

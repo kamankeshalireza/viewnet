@@ -36,7 +36,7 @@ def make_color(value="black", label="مشکی", hexv="#000000"):
     return o
 
 
-def make_product(title="قاب سیلیکونی", category=None, brand=None, variants=((100_000, None, None),), active=True, **kw):
+def make_product(title="قاب سیلیکونی", category=None, brand=None, variants=((100_000, None, None),), active=True, in_stock=True, **kw):
     """variants: iterable of (price_toman, device_model|None, [options]|None, compare_toman|None)."""
     category = category or make_category(name=f"دسته {uid()}")
     p = Product.objects.create(title=title, category=category, brand=brand, is_active=active, **kw)
@@ -44,7 +44,8 @@ def make_product(title="قاب سیلیکونی", category=None, brand=None, var
         price, dm, opts, *rest = (*spec, None, None)[:4] if len(spec) < 4 else spec
         compare = rest[0] if rest else None
         v = ProductVariant.objects.create(product=p, sku=f"SKU-{uid()}", device_model=dm, price_rial=toman_to_rial(price),
-                                          compare_at_price_rial=toman_to_rial(compare) if compare else None, is_default=(n == 0))
+                                          compare_at_price_rial=toman_to_rial(compare) if compare else None, is_default=(n == 0),
+                                          is_in_stock=in_stock)
         if opts:
             v.options.set(opts)
     services.recalc_product(p.pk)
