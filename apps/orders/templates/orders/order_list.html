@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}سفارش‌های من | {{ site.store_name }}{% endblock %}
+{% block meta_extra %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="h4 mb-4">سفارش‌های من</h1>
+  {% for order in page_obj.object_list %}
+  <a href="{{ order.get_absolute_url }}" class="d-flex flex-wrap justify-content-between align-items-center border rounded-3 p-3 mb-3 text-decoration-none text-reset">
+    <div><strong>{{ order.number|fa_digits }}</strong> <span class="text-muted small me-2">{{ order.placed_at|jalali }}</span></div>
+    <div>{% include "components/order_status_badge.html" %}</div>
+    <div class="fw-semibold">{{ order.total_rial|toman }}</div>
+  </a>
+  {% empty %}<p class="text-muted">هنوز سفارشی ثبت نکرده‌اید.</p>{% endfor %}
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav><ul class="pagination">
+    {% for n in page_obj.paginator.page_range %}<li class="page-item {% if n == page_obj.number %}active{% endif %}"><a class="page-link" href="?page={{ n }}">{{ n|fa_digits }}</a></li>{% endfor %}
+  </ul></nav>{% endif %}
+</div>
+{% endblock %}

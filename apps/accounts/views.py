@@ -10,7 +10,9 @@ from apps.core.constants import GUEST_CART_SESSION_KEY
 from apps.core.events import UserLoggedIn, publish
 from apps.core.http import get_client_ip
 
-from .forms import CodeForm, PhoneForm, ProfileForm
+from .forms import AddressForm, CodeForm, PhoneForm, ProfileForm
+from .models import Address
+from .services.addresses import set_default_address
 from .services.auth import login_or_register
 from .services.otp import request_otp, verify_otp
 
@@ -109,3 +111,70 @@ def profile(request):
         messages.success(request, "اطلاعات شما ذخیره شد.")
         return redirect(_safe_next(request, request.POST.get("next") or request.GET.get("next")) if request.GET.get("welcome") else "accounts:profile")
     return render(request, "accounts/profile.html", {"form": form, "welcome": request.GET.get("welcome")})
+
+
+# ---- addresses ------------------------------------------------------------------------------------------
+def _own_address_or_404(request, pk):
+    from django.shortcuts import get_object_or_404
+
+    return get_object_or_404(Address, pk=pk, user=request.user, is_deleted=False)
+
+
+def _after_address(request, default="accounts:addresses"):
+    nxt = request.POST.get("next") or request.GET.get("next") or ""
+    ok = nxt and url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure())
+    return redirect(nxt) if ok else redirect(default)
+
+
+@login_required
+def address_list(request):
+    addresses = Address.objects.filter(user=request.user, is_deleted=False).select_related("province", "city").order_by("-is_default", "-pk")
+    return render(request, "accounts/addresses.html", {"addresses": addresses})
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def address_edit(request, pk=None):
+    instance = _own_address_or_404(request, pk) if pk else None
+    initial = {} if instance else {"receiver_name": request.user.get_full_name(), "receiver_phone": request.user.phone}
+    form = AddressForm(request.POST or None, instance=instance, initial=initial)
+    if request.method == "POST" and form.is_valid():
+        address = form.save(commit=False)
+        address.user = request.user
+        first = not Address.objects.filter(user=request.user, is_deleted=False).exists()
+        wants_default = form.cleaned_data.get("is_default") or first
+        address.is_default = False  # the service flips exactly one default atomically
+        address.save()
+        if wants_default:
+            set_default_address(address)
+        messages.success(request, "نشانی ذخیره شد.")
+        return _after_address(request)
+    return render(request, "accounts/address_form.html", {"form": form, "address": instance,
+                                                          "next": request.GET.get("next") or request.POST.get("next", "")})
+
+
+@login_required
+@require_POST
+def address_delete(request, pk):
+    address = _own_address_or_404(request, pk)
+    address.is_deleted, address.is_default = True, False
+    address.save(update_fields=["is_deleted", "is_default", "updated_at"])
+    messages.info(request, "نشانی حذف شد.")
+    return redirect("accounts:addresses")
+
+
+@login_required
+@require_POST
+def address_make_default(request, pk):
+    set_default_address(_own_address_or_404(request, pk))
+    return redirect("accounts:addresses")
+
+
+@login_required
+def address_cities(request):
+    """HTMX: <option> list for the chosen province."""
+    from apps.locations.models import City
+
+    pid = request.GET.get("province", "")
+    cities = City.objects.filter(is_active=True, province_id=int(pid)) if pid.isdigit() else City.objects.none()
+    return render(request, "accounts/_city_options.html", {"cities": cities})

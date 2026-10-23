@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}ثبت سفارش | {{ site.store_name }}{% endblock %}
+{% block meta_extra %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="page-title light-background"><div class="container"><h1 class="mb-0">ثبت سفارش</h1></div></div>
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <form method="post" action="{% url 'orders:place' %}" id="place-order-form">
+        {% csrf_token %}<input type="hidden" name="token" value="{{ token }}">
+
+        {% if quote.requires_shipping %}
+        <section class="border rounded-3 p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">نشانی تحویل</h2>
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'accounts:address_new' %}?next={% url 'orders:checkout' %}">افزودن نشانی جدید</a>
+          </div>
+          {% for a in addresses %}
+          <div class="form-check border rounded-3 p-3 mb-2 ps-5">
+            <input class="form-check-input" type="radio" name="address_id" id="addr-{{ a.pk }}" value="{{ a.pk }}" {% if forloop.first %}checked{% endif %} required>
+            <label class="form-check-label w-100" for="addr-{{ a.pk }}">
+              <strong>{{ a.receiver_name }}</strong> <span class="text-muted" dir="ltr">{{ a.receiver_phone|fa_digits }}</span>
+              <div>{{ a.province.name }}، {{ a.city.name }}، {{ a.address_line }}{% if a.plaque %}، پلاک {{ a.plaque|fa_digits }}{% endif %}{% if a.unit %}، واحد {{ a.unit|fa_digits }}{% endif %}</div>
+              <div class="small text-muted">کد پستی: {{ a.postal_code|fa_digits }}</div>
+            </label>
+          </div>
+          {% empty %}
+          <p class="text-muted mb-0">هنوز نشانی‌ای ندارید. برای ادامه یک نشانی اضافه کنید.</p>
+          {% endfor %}
+        </section>
+
+        <section class="border rounded-3 p-4 mb-4">
+          <h2 class="h5 mb-3">روش ارسال</h2>
+          {% for m in quote.methods %}
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="shipping_code" id="ship-{{ m.code }}" value="{{ m.code }}" {% if m == quote.method %}checked{% endif %}>
+            <label class="form-check-label" for="ship-{{ m.code }}">{{ m.name }} — {% if m.price_rial %}{{ m.price_rial|toman }}{% else %}<span class="text-success">رایگان</span>{% endif %}
+              <span class="small text-muted">(تحویل: {{ m.eta_text }})</span></label>
+          </div>
+          {% endfor %}
+        </section>
+        {% else %}
+        <div class="alert alert-info">این سفارش فقط شامل کالای غیرحضوری است و نیازی به نشانی و ارسال ندارد.</div>
+        {% endif %}
+
+        <section class="border rounded-3 p-4 mb-4">
+          <label class="form-label h6" for="note">توضیحات سفارش (اختیاری)</label>
+          <textarea class="form-control" name="note" id="note" rows="2" maxlength="300"></textarea>
+        </section>
+
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="accept_terms" id="accept-terms" value="1" required>
+          <label class="form-check-label" for="accept-terms"><a href="/terms/" target="_blank" rel="noopener">قوانین و مقررات</a> فروشگاه را می‌پذیرم.</label>
+        </div>
+        <button class="btn btn-primary btn-lg" type="submit" {% if quote.requires_shipping and not addresses %}disabled{% endif %}>ثبت سفارش</button>
+      </form>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="border rounded-3 p-4">
+        <h2 class="h5 mb-3">خلاصهٔ سفارش</h2>
+        {% for line in quote.lines %}
+        <div class="d-flex justify-content-between small mb-2"><span>{{ line.product.title }}{% if line.variant.label %} — {{ line.variant.label }}{% endif %} × {{ line.quantity|fa_digits }}</span><span class="text-nowrap">{{ line.total_rial|toman }}</span></div>
+        {% endfor %}
+        <hr>
+        <div class="d-flex justify-content-between mb-1"><span>جمع کالاها</span><span>{{ quote.totals.subtotal_rial|toman }}</span></div>
+        {% if quote.totals.coupon_discount_rial %}<div class="d-flex justify-content-between mb-1 text-success"><span>تخفیف ({{ coupon_code }})</span><span>− {{ quote.totals.coupon_discount_rial|toman }}</span></div>{% endif %}
+        {% if quote.requires_shipping %}<div class="d-flex justify-content-between mb-1"><span>هزینهٔ ارسال</span><span>{% if quote.totals.shipping_rial %}{{ quote.totals.shipping_rial|toman }}{% else %}رایگان{% endif %}</span></div>{% endif %}
+        <div class="d-flex justify-content-between fw-bold fs-5 mt-2"><span>مبلغ قابل پرداخت</span><span>{{ quote.totals.total_rial|toman }}</span></div>
+
+        <form method="post" action="{% url 'orders:coupon' %}" class="mt-4">
+          {% csrf_token %}
+          {% if coupon_code %}
+          <input type="hidden" name="remove" value="1"><button class="btn btn-sm btn-outline-danger w-100" type="submit">حذف کد تخفیف «{{ coupon_code }}»</button>
+          {% else %}
+          <label class="form-label small" for="coupon-code">کد تخفیف</label>
+          <div class="input-group"><input class="form-control" id="coupon-code" name="code" dir="ltr" maxlength="30"><button class="btn btn-outline-secondary" type="submit">اعمال</button></div>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

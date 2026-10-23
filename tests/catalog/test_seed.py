@@ -15,4 +15,4 @@ def test_seed_is_idempotent_and_has_users_categories(settings, tmp_path):
     assert set(Category.objects.values_list("name", flat=True)) == {"قاب گوشی", "گلس", "کابل", "شارژر", "ایرپاد", "فندکی ماشین", "پاوربانک", "اپل آیدی"}
     assert Product.objects.filter(product_type="digital", title__contains="اپل آیدی").exists()
     case = Product.objects.get(title__startswith="قاب سیلیکونی")
-    assert case.variants.count() == 4 and case.primary_image.renditions
+    assert case.variants.count() == 4 and case.primary_image is None  # demo data ships no photos (add real ones in the admin)

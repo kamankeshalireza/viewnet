@@ -68,3 +68,14 @@ class UserLoggedIn:
 @dataclass(frozen=True)
 class ReservationsExpired:
     refs: tuple
+
+
+@dataclass(frozen=True)
+class OrderPaid:
+    order_id: int
+
+
+@dataclass(frozen=True)
+class OrderCancelled:
+    order_id: int
+    reason: str = ""

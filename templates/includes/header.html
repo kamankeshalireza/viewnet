@@ -50,6 +50,8 @@
               <div class="dropdown-body">
                 <a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:profile' %}"><i class="bi bi-person-circle ms-2"></i><span>پروفایل من</span></a>
                 <a class="dropdown-item d-flex align-items-center" href="{% url 'catalog:wishlist' %}"><i class="bi bi-heart ms-2"></i><span>علاقه‌مندی‌ها</span></a>
+                <a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:addresses' %}"><i class="bi bi-geo-alt ms-2"></i><span>نشانی‌های من</span></a>
+                <a class="dropdown-item d-flex align-items-center" href="{% url 'orders:list' %}"><i class="bi bi-bag-check ms-2"></i><span>سفارش‌های من</span></a>
               </div>
               <div class="dropdown-footer">
                 <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn btn-outline-primary w-100" type="submit">خروج</button></form>

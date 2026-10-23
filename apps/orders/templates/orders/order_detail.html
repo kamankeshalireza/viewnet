@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}سفارش {{ order.number|fa_digits }} | {{ site.store_name }}{% endblock %}
+{% block meta_extra %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <h1 class="h4 mb-0">سفارش {{ order.number|fa_digits }} {% include "components/order_status_badge.html" %}</h1>
+    <span class="text-muted small">{{ order.placed_at|jalali:"%Y/%m/%d - %H:%M" }}</span>
+  </div>
+
+  {% if order.is_unpaid_open %}
+  <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>سفارش شما ثبت و کالاها برایتان رزرو شد. برای تکمیل، پرداخت را انجام دهید.
+      {% if order.expires_at %}<br><small>مهلت پرداخت تا {{ order.expires_at|jalali:"%H:%M" }}</small>{% endif %}</div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-success" type="button" disabled title="اتصال به درگاه پرداخت در فاز بعد فعال می‌شود">پرداخت آنلاین</button>
+      <form method="post" action="{% url 'orders:cancel' order.number %}">{% csrf_token %}<button class="btn btn-outline-danger" type="submit">لغو سفارش</button></form>
+    </div>
+  </div>
+  {% elif order.status == "cancelled" %}
+  <div class="alert alert-secondary">این سفارش لغو شده است{% if order.cancel_reason %} ({{ order.cancel_reason }}){% endif %}.</div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="border rounded-3 p-3 mb-4">
+        <h2 class="h6 mb-3">اقلام سفارش</h2>
+        {% for item in order.items.all %}
+        <div class="d-flex justify-content-between border-bottom py-2">
+          <div>{{ item.product_title }}{% if item.variant_title %} <span class="text-muted">— {{ item.variant_title }}</span>{% endif %}
+            <div class="small text-muted">{{ item.quantity|fa_digits }} × {{ item.unit_price_rial|toman }}</div></div>
+          <div class="text-nowrap">{{ item.line_total_rial|toman }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% if order.requires_shipping %}
+      <div class="border rounded-3 p-3">
+        <h2 class="h6 mb-2">نشانی تحویل</h2>
+        <div>{{ order.receiver_name }} — <span dir="ltr">{{ order.receiver_phone|fa_digits }}</span></div>
+        <div>{{ order.ship_province }}، {{ order.ship_city }}، {{ order.ship_address }}{% if order.ship_plaque %}، پلاک {{ order.ship_plaque|fa_digits }}{% endif %}{% if order.ship_unit %}، واحد {{ order.ship_unit|fa_digits }}{% endif %}</div>
+        <div class="small text-muted">کد پستی: {{ order.ship_postal_code|fa_digits }} · روش ارسال: {{ order.shipping_method_name }}</div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-lg-4">
+      <div class="border rounded-3 p-4">
+        <div class="d-flex justify-content-between mb-1"><span>جمع کالاها</span><span>{{ order.subtotal_rial|toman }}</span></div>
+        {% if order.coupon_discount_rial %}<div class="d-flex justify-content-between mb-1 text-success"><span>تخفیف</span><span>− {{ order.coupon_discount_rial|toman }}</span></div>{% endif %}
+        {% if order.requires_shipping %}<div class="d-flex justify-content-between mb-1"><span>ارسال</span><span>{% if order.shipping_rial %}{{ order.shipping_rial|toman }}{% else %}رایگان{% endif %}</span></div>{% endif %}
+        <div class="d-flex justify-content-between fw-bold fs-5 mt-2"><span>مبلغ کل</span><span>{{ order.total_rial|toman }}</span></div>
+        <div class="small text-muted mt-2">وضعیت پرداخت: {{ order.get_payment_status_display }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

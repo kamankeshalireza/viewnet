@@ -1,25 +1,70 @@
 {% extends "base.html" %}
+{% load static catalog_extras %}
 {% block title %}{{ site.store_name }} | {{ site.tagline }}{% endblock %}
-{% block meta_description %}{{ site.tagline }} — قاب، گلس، کابل، شارژر، پاوربانک و لوازم جانبی موبایل با قیمت مناسب.{% endblock %}
+{% block meta_description %}{{ site.tagline }} — قاب، گلس، کابل، شارژر، پاوربانک و لوازم جانبی موبایل مناسب مدل گوشی شما، با قیمت مناسب و ارسال رایگان.{% endblock %}
 {% block body_class %}index-page{% endblock %}
 {% block content %}
-<section class="py-5 light-background text-center">
+
+<section class="home-hero">
   <div class="container">
-    <h2 class="mb-3">{{ site.store_name }}</h2>
-    <p class="lead mb-4">{{ site.tagline }} — شیک، مدرن و مقرون‌به‌صرفه</p>
-    <a href="{% url 'catalog:all' %}" class="btn btn-primary btn-lg">مشاهدهٔ محصولات</a>
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="home-eyebrow"><i class="bi bi-stars"></i> {{ site.tagline }}</span>
+        <h2 class="home-title">لوازم جانبی گوشی،<br>شیک، مدرن و <span class="home-mark">مقرون‌به‌صرفه</span></h2>
+        <p class="home-lead">گوشی خودتان را انتخاب کنید تا فقط محصولات مناسب همان مدل را ببینید؛ قاب، گلس، شارژر و بیشتر.</p>
+
+        <form class="phone-finder" action="{% url 'catalog:all' %}" method="get">
+          <label for="finder-device" class="visually-hidden">مدل گوشی</label>
+          <div class="input-group input-group-lg">
+            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+            <select id="finder-device" name="device" class="form-select" required>
+              <option value="" selected disabled>گوشی شما چیست؟</option>
+              {% regroup device_models by brand as brand_groups %}
+              {% for group in brand_groups %}
+              <optgroup label="{{ group.grouper.name }}">
+                {% for d in group.list %}<option value="{{ d.slug }}">{{ d.name }}</option>{% endfor %}
+              </optgroup>
+              {% endfor %}
+            </select>
+            <button class="btn btn-dark" type="submit">نمایش محصولات</button>
+          </div>
+        </form>
+        <a class="home-link" href="{% url 'catalog:all' %}">مشاهدهٔ همهٔ محصولات <i class="bi bi-arrow-left"></i></a>
+      </div>
+
+      <div class="col-lg-6 d-none d-lg-block">
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-tile art-1"><i class="bi bi-phone"></i><span>قاب</span></div>
+          <div class="art-tile art-2"><i class="bi bi-lightning-charge"></i><span>شارژر</span></div>
+          <div class="art-tile art-3"><i class="bi bi-earbuds"></i><span>ایرپاد</span></div>
+          <div class="art-tile art-4"><i class="bi bi-battery-charging"></i><span>پاوربانک</span></div>
+          <div class="art-dot d1"></div><div class="art-dot d2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="home-perks">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-4"><div class="perk"><i class="bi bi-truck"></i><div><strong>ارسال رایگان</strong><span>برای همهٔ سفارش‌ها</span></div></div></div>
+      <div class="col-md-4"><div class="perk"><i class="bi bi-phone-vibrate"></i><div><strong>ورود سریع با پیامک</strong><span>بدون نیاز به رمز عبور</span></div></div></div>
+      <div class="col-md-4"><div class="perk"><i class="bi bi-bullseye"></i><div><strong>مناسب مدل گوشی شما</strong><span>موجودی هر مدل جداگانه نمایش داده می‌شود</span></div></div></div>
+    </div>
   </div>
 </section>
 
 {% if categories %}
-<section class="py-5">
+<section class="home-section">
   <div class="container">
-    <h3 class="mb-4">دسته‌بندی‌ها</h3>
+    <div class="home-head"><h3>دسته‌بندی‌ها</h3></div>
     <div class="row g-3">
       {% for c in categories %}
       <div class="col-6 col-md-4 col-lg-3">
-        <a href="{{ c.url }}" class="d-block text-center p-4 border rounded-3 h-100 text-decoration-none">
-          <i class="bi bi-grid fs-1 d-block mb-2"></i><span class="fw-semibold">{{ c.name }}</span>
+        <a href="{{ c.url }}" class="cat-tile">
+          <span class="cat-icon"><i class="bi {{ c.name|category_icon }}"></i></span>
+          <span class="cat-name">{{ c.name }}</span>
         </a>
       </div>
       {% endfor %}
@@ -28,22 +73,57 @@
 </section>
 {% endif %}
 
+{% if device_models %}
+<section class="home-section pt-0">
+  <div class="container">
+    <div class="home-head"><h3>گوشی خود را انتخاب کنید</h3></div>
+    <div class="chip-row">
+      {% for d in device_models|slice:":14" %}<a class="chip" href="{% url 'catalog:all' %}?device={{ d.slug }}">{{ d.name }}</a>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {% if featured_products %}
-<section class="py-4"><div class="container">
-  <h3 class="mb-4">محصولات ویژه</h3>
-  <div class="row g-4">{% for product in featured_products %}<div class="col-6 col-lg-3">{% include "components/product_card.html" %}</div>{% endfor %}</div>
-</div></section>
+<section class="home-section">
+  <div class="container">
+    <div class="home-head"><h3>محصولات ویژه</h3><a href="{% url 'catalog:all' %}">همه <i class="bi bi-arrow-left"></i></a></div>
+    <div class="category-product-list p-0"><div class="row g-4">
+      {% for product in featured_products %}<div class="col-6 col-lg-4 col-xl-3">{% include "components/product_card.html" %}</div>{% endfor %}
+    </div></div>
+  </div>
+</section>
 {% endif %}
+
 {% if bestsellers %}
-<section class="py-4"><div class="container">
-  <h3 class="mb-4">پرفروش‌ترین‌ها</h3>
-  <div class="row g-4">{% for product in bestsellers %}<div class="col-6 col-lg-3">{% include "components/product_card.html" %}</div>{% endfor %}</div>
-</div></section>
+<section class="home-section">
+  <div class="container">
+    <div class="home-head"><h3>پرفروش‌ترین‌ها</h3></div>
+    <div class="category-product-list p-0"><div class="row g-4">
+      {% for product in bestsellers %}<div class="col-6 col-lg-4 col-xl-3">{% include "components/product_card.html" %}</div>{% endfor %}
+    </div></div>
+  </div>
+</section>
 {% endif %}
-<section class="py-4"><div class="container">
-  <h3 class="mb-4">جدیدترین محصولات</h3>
-  {% if new_products %}
-  <div class="row g-4">{% for product in new_products %}<div class="col-6 col-lg-3">{% include "components/product_card.html" %}</div>{% endfor %}</div>
-  {% else %}<p class="text-muted">هنوز محصولی ثبت نشده است.</p>{% endif %}
-</div></section>
+
+<section class="home-section">
+  <div class="container">
+    <div class="home-head"><h3>جدیدترین محصولات</h3><a href="{% url 'catalog:all' %}?sort=newest">همه <i class="bi bi-arrow-left"></i></a></div>
+    {% if new_products %}
+    <div class="category-product-list p-0"><div class="row g-4">
+      {% for product in new_products %}<div class="col-6 col-lg-4 col-xl-3">{% include "components/product_card.html" %}</div>{% endfor %}
+    </div></div>
+    {% else %}<p class="text-muted">هنوز محصولی ثبت نشده است.</p>{% endif %}
+  </div>
+</section>
+
+{% if not request.user.is_authenticated %}
+<section class="home-cta">
+  <div class="container text-center">
+    <h3>با شمارهٔ موبایل وارد شوید</h3>
+    <p>ثبت‌نام و ورود فقط با یک کد پیامکی؛ بدون رمز عبور، با پیگیری سفارش و علاقه‌مندی‌ها.</p>
+    <a href="{% url 'accounts:login' %}" class="btn btn-light btn-lg">ورود / ثبت‌نام</a>
+  </div>
+</section>
+{% endif %}
 {% endblock %}

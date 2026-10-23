@@ -91,9 +91,9 @@
       </div>
 
       {% if page_obj.object_list %}
-      <div class="row g-4">
+      <div class="category-product-list p-0"><div class="row g-4">
         {% for product in page_obj.object_list %}<div class="col-6 col-xl-4">{% include "components/product_card.html" %}</div>{% endfor %}
-      </div>
+      </div></div>
       {% if page_obj.paginator.num_pages > 1 %}
       <nav class="mt-4" aria-label="صفحه‌بندی">
         <ul class="pagination justify-content-center">

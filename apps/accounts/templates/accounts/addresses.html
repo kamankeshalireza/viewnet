@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}نشانی‌های من | {{ site.store_name }}{% endblock %}
+{% block meta_extra %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h4 mb-0">نشانی‌های من</h2>
+    <a class="btn btn-primary" href="{% url 'accounts:address_new' %}">افزودن نشانی</a>
+  </div>
+  {% for a in addresses %}
+  <div class="border rounded-3 p-3 mb-3">
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+      <div>
+        <strong>{{ a.receiver_name }}</strong> <span class="text-muted" dir="ltr">{{ a.receiver_phone|fa_digits }}</span>
+        {% if a.is_default %}<span class="badge bg-success me-2">پیش‌فرض</span>{% endif %}
+        <div class="mt-1">{{ a.province.name }}، {{ a.city.name }}، {{ a.address_line }}{% if a.plaque %}، پلاک {{ a.plaque|fa_digits }}{% endif %}{% if a.unit %}، واحد {{ a.unit|fa_digits }}{% endif %}</div>
+        <div class="small text-muted">کد پستی: {{ a.postal_code|fa_digits }}</div>
+      </div>
+      <div class="d-flex gap-2 align-items-start">
+        {% if not a.is_default %}<form method="post" action="{% url 'accounts:address_default' a.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary" type="submit">پیش‌فرض کن</button></form>{% endif %}
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'accounts:address_edit' a.pk %}">ویرایش</a>
+        <form method="post" action="{% url 'accounts:address_delete' a.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">حذف</button></form>
+      </div>
+    </div>
+  </div>
+  {% empty %}<p class="text-muted">هنوز نشانی‌ای ثبت نکرده‌اید.</p>{% endfor %}
+</div>
+{% endblock %}

@@ -25,3 +25,24 @@
 - **Worker command:** `celery -A config worker -Q default,otp,images -l info` and `celery -A config beat -l info`.
 - **Postgres-only test:** `test_concurrent_buyers_never_oversell_last_unit` is skipped on SQLite; run the suite on PostgreSQL in CI.
 - Demo data: `seed_catalog --demo` then `seed_demo_stock`.
+
+## Review fixes & design pass (after reviewing the pushed repo)
+- `config/__init__.py` must import the Celery app (an empty file silently falls back to Celery's AMQP default → OTP/image tasks fail). Regression tests added.
+- Development runs Celery tasks inline (`CELERY_EAGER`, default on) so the OTP code prints to the console without a worker.
+- **Why the site looked weak:** the template only styles `.product-card` inside `.category-product-list`; all product grids are now wrapped in it.
+  The home page was redesigned (phone-model finder, perks, category tiles with icons, brand-colour buttons). Demo products no longer ship the
+  template's fashion/furniture photos — add real product photos in the admin.
+- Added `.gitattributes` (LF) to stop CRLF noise on Windows.
+
+## Phase 5 — Checkout, addresses, coupons, orders
+- **Free shipping for everyone** (one `ShippingMethod` "free", price 0, created by a data migration). `shipping.quote()` is the single place to add rates later.
+- Digital-only carts (Apple ID) skip address/shipping/stock entirely. Mixed carts need an address.
+- `place_order` is one atomic step: order + items (snapshot prices/titles/address) + stock reservation + coupon reservation. Same `checkout_token` → same order (double-click safe).
+  Failure of any part (stock, coupon limit) rolls back everything and leaves the cart intact.
+- Order lifecycle lives in `orders.services.orders` (state table in `orders.domain.state_machine`). `mark_paid()` (for Phase 6) consumes stock, redeems the coupon, bumps `sales_count`, is idempotent,
+  and raises `ReservationLost` if the stock hold already expired (caller flags `needs_review`). Cancelling a *paid* order is intentionally unsupported until refunds exist (Phase 7).
+- Unpaid orders expire after `ORDER_PAYMENT_TIMEOUT_MINUTES` (30): by the stock-expiry event and by the `expire_unpaid_orders` Beat task (both idempotent).
+- Coupons: whole-order scope (percent/fixed, cap, min order, dates, total & per-user limits). Usage is *reserved* at checkout, *redeemed* on payment, *released* on cancel/expiry.
+  Jalali date pickers in the admin are not done yet (⚠️ V13).
+- Cities: `seed_locations` loads 31 provinces + 82 starter cities (capitals/big cities) — **not** the official full list; add the rest in the admin (⚠️ V20).
+- The "Pay online" button is a placeholder until Phase 6 (payment gateway).

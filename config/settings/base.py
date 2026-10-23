@@ -27,6 +27,9 @@ INSTALLED_APPS = [
     "apps.catalog",
     "apps.inventory",
     "apps.cart",
+    "apps.shipping",
+    "apps.discounts",
+    "apps.orders",
 ]
 
 MIDDLEWARE = [
@@ -148,3 +151,5 @@ CELERY_TASK_ROUTES["apps.catalog.images.process_product_image"] = {"queue": "ima
 CART_MAX_QTY_PER_ITEM = env.int("CART_MAX_QTY_PER_ITEM", default=10)
 CELERY_TASK_ROUTES["apps.inventory.tasks.expire_stock_reservations"] = {"queue": "default"}
 CELERY_BEAT_SCHEDULE["expire-stock-reservations"] = {"task": "apps.inventory.tasks.expire_stock_reservations", "schedule": 60.0}
+CELERY_TASK_ROUTES["apps.orders.tasks.expire_unpaid_orders"] = {"queue": "default"}
+CELERY_BEAT_SCHEDULE["expire-unpaid-orders"] = {"task": "apps.orders.tasks.expire_unpaid_orders", "schedule": 60.0}

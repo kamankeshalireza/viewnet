@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{% if address %}ویرایش نشانی{% else %}نشانی جدید{% endif %} | {{ site.store_name }}{% endblock %}
+{% block meta_extra %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="row justify-content-center"><div class="col-lg-7">
+  <h2 class="h4 mb-4">{% if address %}ویرایش نشانی{% else %}نشانی جدید{% endif %}</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label" for="{{ form.receiver_name.id_for_label }}">{{ form.receiver_name.label }}</label>{{ form.receiver_name }}{% for e in form.receiver_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+      <div class="col-md-6"><label class="form-label" for="{{ form.receiver_phone.id_for_label }}">{{ form.receiver_phone.label }}</label>{{ form.receiver_phone }}{% for e in form.receiver_phone.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+      <div class="col-md-6"><label class="form-label" for="id_province">{{ form.province.label }}</label>
+        <select name="province" id="id_province" class="form-select" required
+                hx-get="{% url 'accounts:address_cities' %}" hx-target="#id_city" hx-trigger="change" hx-include="this">
+          <option value="">انتخاب استان…</option>
+          {% for p in form.fields.province.queryset %}<option value="{{ p.pk }}" {% if form.province.value|stringformat:"s" == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+        </select>{% for e in form.province.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+      <div class="col-md-6"><label class="form-label" for="id_city">{{ form.city.label }}</label>
+        <select name="city" id="id_city" class="form-select" required>
+          <option value="">انتخاب شهر…</option>
+          {% for c in form.fields.city.queryset %}<option value="{{ c.pk }}" {% if form.city.value|stringformat:"s" == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+        </select>{% for e in form.city.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+      <div class="col-12"><label class="form-label" for="{{ form.address_line.id_for_label }}">{{ form.address_line.label }}</label>{{ form.address_line }}{% for e in form.address_line.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+      <div class="col-md-4"><label class="form-label" for="{{ form.plaque.id_for_label }}">{{ form.plaque.label }}</label>{{ form.plaque }}</div>
+      <div class="col-md-4"><label class="form-label" for="{{ form.unit.id_for_label }}">{{ form.unit.label }}</label>{{ form.unit }}</div>
+      <div class="col-md-4"><label class="form-label" for="{{ form.postal_code.id_for_label }}">{{ form.postal_code.label }}</label>{{ form.postal_code }}{% for e in form.postal_code.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+      <div class="col-12 form-check ms-3">{{ form.is_default }} <label class="form-check-label" for="{{ form.is_default.id_for_label }}">{{ form.is_default.label }}</label></div>
+    </div>
+    <div class="mt-4 d-flex gap-2"><button class="btn btn-primary" type="submit">ذخیره</button><a class="btn btn-outline-secondary" href="{% url 'accounts:addresses' %}">انصراف</a></div>
+  </form>
+</div></div></div>
+{% endblock %}

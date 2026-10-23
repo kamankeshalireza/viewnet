@@ -155,9 +155,16 @@ def get_product_for_detail(pk: int) -> Product | None:
             .filter(pk=pk).first())
 
 
+def phone_models_in_use() -> list[DeviceModel]:
+    """Phone models that have at least one active sellable variant (for the "find accessories for my phone" picker)."""
+    return list(DeviceModel.objects.filter(is_active=True, variants__is_active=True, variants__product__is_active=True)
+                .select_related("brand").distinct().order_by("brand__name", "-release_year", "name"))
+
+
 def home_sections(limit: int = 8) -> dict:
     base = with_card_data(published_products())
     return {
+        "device_models": phone_models_in_use(),
         "new_products": list(base.order_by("-published_at", "-pk")[:limit]),
         "featured_products": list(base.filter(is_featured=True).order_by("-published_at")[:limit]),
         "bestsellers": list(base.filter(sales_count__gt=0).order_by("-sales_count")[:limit]),

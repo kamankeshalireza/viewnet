@@ -47,7 +47,7 @@
         <div class="d-flex justify-content-between mb-2"><span>تعداد کالا</span><span>{{ cart.totals.item_count|fa_digits }}</span></div>
         <div class="d-flex justify-content-between fw-bold fs-5 mb-3"><span>جمع کل</span><span>{{ cart.totals.subtotal_rial|toman }}</span></div>
         <p class="small text-muted">هزینهٔ ارسال و کد تخفیف در مرحلهٔ بعد محاسبه می‌شود.</p>
-        <button class="btn btn-primary w-100" type="button" disabled title="مرحلهٔ ثبت سفارش در فاز بعد فعال می‌شود">ادامه و ثبت سفارش</button>
+        <a class="btn btn-primary w-100" href="{% url 'orders:checkout' %}">ادامه و ثبت سفارش</a>
         <a href="{% url 'catalog:all' %}" class="btn btn-link w-100 mt-2">ادامهٔ خرید</a>
       </div>
     </div>

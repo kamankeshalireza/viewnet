@@ -41,7 +41,7 @@
             <div>
               <input type="radio" class="btn-check" name="axis-{{ ax.key }}" id="ax-{{ ax.key }}-{{ c.id }}" value="{{ c.id }}" data-axis="{{ ax.key }}" {% if c.id == ax.selected %}checked{% endif %}>
               <label class="btn btn-outline-secondary btn-sm" for="ax-{{ ax.key }}-{{ c.id }}">
-                {% if c.hex %}<span class="swatch-dot d-inline-block align-middle ms-1" data-hex="{{ c.hex }}"></span>{% endif %}{{ c.label }}
+                {% if c.hex %}<span class="swatch-dot d-inline-block align-middle" data-hex="{{ c.hex }}"></span>{% endif %}{{ c.label }}
               </label>
             </div>
             {% endfor %}
@@ -88,7 +88,7 @@
 
     {% if related %}
     <h3 class="mt-5 mb-4">محصولات مرتبط</h3>
-    <div class="row g-4">{% for product in related %}<div class="col-6 col-lg-3">{% include "components/product_card.html" %}</div>{% endfor %}</div>
+    <div class="category-product-list p-0"><div class="row g-4">{% for product in related %}<div class="col-6 col-lg-3">{% include "components/product_card.html" %}</div>{% endfor %}</div></div>
     {% endif %}
   </div>
 </section>
